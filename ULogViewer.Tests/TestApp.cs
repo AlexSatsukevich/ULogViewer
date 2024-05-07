@@ -33,9 +33,9 @@ namespace CarinaStudio.ULogViewer
 			var syncLock = new object();
 			lock (syncLock)
 			{
-				Current.SynchronizationContext.Post(() =>
+				Current.SynchronizationContext.Post(async () =>
 				{
-					Logs.DataSources.LogDataSourceProviders.Initialize(app);
+					await Logs.DataSources.LogDataSourceProviders.InitializeAsync(app);
 					lock (syncLock)
 						Monitor.Pulse(syncLock);
 				});

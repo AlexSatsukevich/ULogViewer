@@ -46,11 +46,11 @@ namespace CarinaStudio.ULogViewer.Logs
 		// Static initializer.
 		static LogReaderTests()
 		{
-			LogPatterns = new LogPattern[] {
-				new LogPattern(LogHeaderRegex, false, false),
-				new LogPattern(LogMessageRegex, true, true),
-				new LogPattern(LogTailRegex, false, false),
-			};
+            LogPatterns = [
+				new LogPattern(LogHeaderRegex, false, false, ""),
+				new LogPattern(LogMessageRegex, true, true, ""),
+				new LogPattern(LogTailRegex, false, false, ""),
+			];
 		}
 
 
@@ -80,18 +80,18 @@ namespace CarinaStudio.ULogViewer.Logs
 						IsContinuousReading = true,
 						LogLevelMap = LogLevelMap,
 						LogPatterns = LogPatterns,
-						TimestampFormat = TimestampFormat,
+                        TimestampFormats = [TimestampFormat],
 					};
 
 					// read logs 10 times
 					logReader.Start();
 					for (var j = 0; j < 50; ++j)
 					{
-						Assert.IsTrue(await logReader.WaitForPropertyAsync(nameof(LogReader.State), LogReaderState.Starting, 5000));
-						Assert.IsTrue(await logReader.WaitForPropertyAsync(nameof(LogReader.State), LogReaderState.ReadingLogs, 5000));
-						Assert.IsTrue(await logReader.WaitForPropertyAsync(nameof(LogReader.State), LogReaderState.Starting, -1));
+						Assert.That(await logReader.WaitForPropertyAsync(nameof(LogReader.State), LogReaderState.Starting, 5000));
+						Assert.That(await logReader.WaitForPropertyAsync(nameof(LogReader.State), LogReaderState.ReadingLogs, 5000));
+						Assert.That(await logReader.WaitForPropertyAsync(nameof(LogReader.State), LogReaderState.Starting, -1));
 					}
-					Assert.LessOrEqual(logCount * 30, logReader.Logs.Count);
+					Assert.That(logCount * 30 <= logReader.Logs.Count);
 				}
 			});
 		}
@@ -207,7 +207,7 @@ namespace CarinaStudio.ULogViewer.Logs
 					LogLevelMap = LogLevelMap,
 					LogPatterns = LogPatterns,
 					MaxLogCount = 2048,
-					TimestampFormat = TimestampFormat,
+					TimestampFormats = [TimestampFormat],
 				};
 
 				// start reading logs and check log count
@@ -215,7 +215,7 @@ namespace CarinaStudio.ULogViewer.Logs
 				for (var j = 0; j < 100; ++j)
 				{
 					await Task.Delay(200);
-					Assert.LessOrEqual(logReader1.Logs.Count, logReader1.MaxLogCount);
+					Assert.That(logReader1.Logs.Count <= logReader1.MaxLogCount);
 				}
 				logReader1.Dispose();
 
@@ -226,7 +226,7 @@ namespace CarinaStudio.ULogViewer.Logs
 					LogLevelMap = LogLevelMap,
 					LogPatterns = LogPatterns,
 					MaxLogCount = 2048,
-					TimestampFormat = TimestampFormat,
+					TimestampFormats = new[] { TimestampFormat },
 				};
 
 				// start reading logs and check log count
@@ -234,7 +234,7 @@ namespace CarinaStudio.ULogViewer.Logs
 				for (var j = 0; j < 100; ++j)
 				{
 					await Task.Delay(200);
-					Assert.LessOrEqual(logReader2.Logs.Count, logReader2.MaxLogCount);
+					Assert.That(logReader2.Logs.Count <= logReader2.MaxLogCount);
 				}
 				logReader2.Dispose();
 
@@ -246,7 +246,7 @@ namespace CarinaStudio.ULogViewer.Logs
 					LogLevelMap = LogLevelMap,
 					LogPatterns = LogPatterns,
 					MaxLogCount = 2048,
-					TimestampFormat = TimestampFormat,
+					TimestampFormats = new[] { TimestampFormat },
 				};
 
 				// start reading logs and check log count
@@ -254,7 +254,7 @@ namespace CarinaStudio.ULogViewer.Logs
 				for (var j = 0; j < 100; ++j)
 				{
 					await Task.Delay(200);
-					Assert.LessOrEqual(logReader3.Logs.Count, logReader3.MaxLogCount);
+					Assert.That(logReader3.Logs.Count <= logReader3.MaxLogCount);
 				}
 				logReader3.Dispose();
 			});
@@ -284,8 +284,8 @@ namespace CarinaStudio.ULogViewer.Logs
 				{
 					IsContinuousReading = true,
 					LogLevelMap = LogLevelMap,
-					LogPatterns = LogPatterns,
-					TimestampFormat = TimestampFormat,
+					LogPatterns = LogPatterns,					
+					TimestampFormats = new [] { TimestampFormat },
 				};
 
 				// start reading logs and check pause/resume
@@ -297,20 +297,20 @@ namespace CarinaStudio.ULogViewer.Logs
 					await Task.Delay(1000);
 
 					// pause
-					Assert.IsTrue(logReader.Pause());
+					Assert.That(logReader.Pause());
 					var readLogCount = logReader.Logs.Count;
 					if (logReader.State == LogReaderState.Paused)
-						Assert.IsTrue(await logReader.WaitForPropertyAsync(nameof(LogReader.State), LogReaderState.StartingWhenPaused, -1));
+						Assert.That(await logReader.WaitForPropertyAsync(nameof(LogReader.State), LogReaderState.StartingWhenPaused, -1));
 					else
-						Assert.IsTrue(await logReader.WaitForPropertyAsync(nameof(LogReader.State), LogReaderState.Paused, -1));
+						Assert.That(await logReader.WaitForPropertyAsync(nameof(LogReader.State), LogReaderState.Paused, -1));
 					await Task.Delay(1000);
-					Assert.AreEqual(readLogCount, logReader.Logs.Count);
-					Assert.Greater(readLogCount, prevReadLogCount);
+					Assert.Equals(readLogCount, logReader.Logs.Count);
+					Assert.That(readLogCount > prevReadLogCount);
 					prevReadLogCount = readLogCount;
 
 					// resume
-					Assert.IsTrue(logReader.Resume());
-					Assert.IsTrue(logReader.State == LogReaderState.Starting || logReader.State == LogReaderState.ReadingLogs);
+					Assert.That(logReader.Resume());
+					Assert.That(logReader.State == LogReaderState.Starting || logReader.State == LogReaderState.ReadingLogs);
 				}
 			});
 		}
@@ -341,15 +341,15 @@ namespace CarinaStudio.ULogViewer.Logs
 					{
 						LogLevelMap = LogLevelMap,
 						LogPatterns = LogPatterns,
-						TimestampFormat = TimestampFormat,
+						TimestampFormats = new[] { TimestampFormat },
 					};
 
 					// read logs
 					logReader1.Start();
-					Assert.AreEqual(LogReaderState.Starting, logReader1.State);
-					Assert.IsTrue(await logReader1.WaitForPropertyAsync(nameof(LogReader.State), LogReaderState.ReadingLogs, 5000));
-					Assert.IsTrue(await logReader1.WaitForPropertyAsync(nameof(LogReader.State), LogReaderState.Stopped, -1));
-					Assert.AreEqual(logCount, logReader1.Logs.Count);
+					Assert.Equals(LogReaderState.Starting, logReader1.State);
+					Assert.That(await logReader1.WaitForPropertyAsync(nameof(LogReader.State), LogReaderState.ReadingLogs, 5000));
+					Assert.That(await logReader1.WaitForPropertyAsync(nameof(LogReader.State), LogReaderState.Stopped, -1));
+					Assert.Equals(logCount, logReader1.Logs.Count);
 
 					// try reading logs again
 					try
@@ -365,24 +365,24 @@ namespace CarinaStudio.ULogViewer.Logs
 
 					// dispose log reader
 					logReader1.Dispose();
-					Assert.AreEqual(LogReaderState.Disposed, logReader1.State);
+					Assert.Equals(LogReaderState.Disposed, logReader1.State);
 
 					// create log reader
 					using var logReader2 = new LogReader(source, Task.Factory)
 					{
 						LogLevelMap = LogLevelMap,
 						LogPatterns = new LogPattern[] { 
-							new LogPattern(LogHeaderRegex, false, false),
+							new LogPattern(LogHeaderRegex, false, false, ""),
 						},
-						TimestampFormat = TimestampFormat,
+						TimestampFormats = new[] { TimestampFormat },
 					};
 
 					// read logs
 					logReader2.Start();
-					Assert.AreEqual(LogReaderState.Starting, logReader2.State);
-					Assert.IsTrue(await logReader2.WaitForPropertyAsync(nameof(LogReader.State), LogReaderState.ReadingLogs, 5000));
-					Assert.IsTrue(await logReader2.WaitForPropertyAsync(nameof(LogReader.State), LogReaderState.Stopped, -1));
-					Assert.AreEqual(logCount, logReader2.Logs.Count);
+					Assert.Equals(LogReaderState.Starting, logReader2.State);
+					Assert.That(await logReader2.WaitForPropertyAsync(nameof(LogReader.State), LogReaderState.ReadingLogs, 5000));
+					Assert.That(await logReader2.WaitForPropertyAsync(nameof(LogReader.State), LogReaderState.Stopped, -1));
+					Assert.Equals(logCount, logReader2.Logs.Count);
 				}
 			});
 		}
@@ -409,14 +409,14 @@ namespace CarinaStudio.ULogViewer.Logs
 				{
 					LogLevelMap = LogLevelMap,
 					LogPatterns = LogPatterns,
-					TimestampFormat = TimestampFormat,
+					TimestampFormats = new[] { TimestampFormat },
 				};
 
 				// read logs
 				logReader1.Start();
-				Assert.AreEqual(LogReaderState.Starting, logReader1.State);
-				Assert.IsTrue(await logReader1.WaitForPropertyAsync(nameof(LogReader.State), LogReaderState.DataSourceError, 5000));
-				Assert.AreEqual(0, logReader1.Logs.Count);
+				Assert.Equals(LogReaderState.Starting, logReader1.State);
+				Assert.That(await logReader1.WaitForPropertyAsync(nameof(LogReader.State), LogReaderState.DataSourceError, 5000));
+				Assert.Equals(0, logReader1.Logs.Count);
 				logReader1.Dispose();
 
 				// create another log reader
@@ -424,10 +424,10 @@ namespace CarinaStudio.ULogViewer.Logs
 				{
 					LogLevelMap = LogLevelMap,
 					LogPatterns = LogPatterns,
-					TimestampFormat = TimestampFormat,
+					TimestampFormats = new[] { TimestampFormat },
 				};
 				logReader2.Start();
-				Assert.AreEqual(LogReaderState.DataSourceError, logReader2.State);
+				Assert.Equals(LogReaderState.DataSourceError, logReader2.State);
 			});
 		}
 	}

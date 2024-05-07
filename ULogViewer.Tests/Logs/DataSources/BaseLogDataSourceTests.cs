@@ -53,16 +53,16 @@ namespace CarinaStudio.ULogViewer.Logs.DataSources
 				// create 1st instance
 				this.PrepareSource(provider, this.GenerateRandomLines(), out var options);
 				using var source1 = provider.CreateSource(options);
-				Assert.AreSame(provider, source1.Provider, "Provider reported by source is different.");
-				Assert.AreEqual(options, source1.CreationOptions, "Options reported by source is different.");
+				Assert.That(provider == source1.Provider, "Provider reported by source is different.");
+				Assert.That(options == source1.CreationOptions, "Options reported by source is different.");
 
 				// create 2nd source
 				try
 				{
 					this.PrepareSource(provider, this.GenerateRandomLines(), out options);
 					using var source2 = provider.CreateSource(options);
-					Assert.AreSame(provider, source2.Provider, "Provider reported by source is different.");
-					Assert.AreEqual(options, source2.CreationOptions, "Options reported by source is different.");
+					Assert.That(provider == source2.Provider, "Provider reported by source is different.");
+					Assert.That(options == source2.CreationOptions, "Options reported by source is different.");
 				}
 				catch (Exception ex)
 				{
@@ -78,8 +78,8 @@ namespace CarinaStudio.ULogViewer.Logs.DataSources
 				// create 3rd instance
 				this.PrepareSource(provider, this.GenerateRandomLines(), out options);
 				using var source3 = provider.CreateSource(options);
-				Assert.AreSame(provider, source3.Provider, "Provider reported by source is different.");
-				Assert.AreEqual(options, source3.CreationOptions, "Options reported by source is different.");
+				Assert.That(provider == source3.Provider, "Provider reported by source is different.");
+				Assert.That(options == source3.CreationOptions, "Options reported by source is different.");
 			});
 		}
 
@@ -118,15 +118,15 @@ namespace CarinaStudio.ULogViewer.Logs.DataSources
 				// dispose when ready to open reader
 				using (var source = provider.CreateSource(options))
 				{
-					Assert.IsTrue(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.ReadyToOpenReader, 5000));
+					Assert.That(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.ReadyToOpenReader, 5000));
 				}
 
 				// dispose when opening reader
 				using (var source = provider.CreateSource(options))
 				{
-					Assert.IsTrue(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.ReadyToOpenReader, 5000));
+					Assert.That(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.ReadyToOpenReader, 5000));
 					var openReaderTask = source.OpenReaderAsync();
-					Assert.IsTrue(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.OpeningReader, 5000));
+					Assert.That(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.OpeningReader, 5000));
 					source.Dispose();
 					try
 					{
@@ -143,9 +143,9 @@ namespace CarinaStudio.ULogViewer.Logs.DataSources
 				// dispose when reading data
 				using (var source = provider.CreateSource(options))
 				{
-					Assert.IsTrue(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.ReadyToOpenReader, 5000));
+					Assert.That(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.ReadyToOpenReader, 5000));
 					using var reader = await source.OpenReaderAsync();
-					Assert.IsNotNull(reader.ReadLine());
+					Assert.That(reader.ReadLine() != null);
 					source.Dispose();
 					try
 					{
@@ -163,18 +163,18 @@ namespace CarinaStudio.ULogViewer.Logs.DataSources
 				// dispose immediately after closing reader
 				using (var source = provider.CreateSource(options))
 				{
-					Assert.IsTrue(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.ReadyToOpenReader, 5000));
+					Assert.That(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.ReadyToOpenReader, 5000));
 					using (var reader = await source.OpenReaderAsync())
-						Assert.IsNotNull(reader.ReadLine());
+						Assert.That(reader.ReadLine() != null);
 				}
 
 				// dispose when preparing after closing reader
 				using (var source = provider.CreateSource(options))
 				{
-					Assert.IsTrue(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.ReadyToOpenReader, 5000));
+					Assert.That(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.ReadyToOpenReader, 5000));
 					using (var reader = await source.OpenReaderAsync())
-						Assert.IsNotNull(reader.ReadLine());
-					Assert.IsTrue(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.Preparing, 5000));
+						Assert.That(reader.ReadLine() != null);
+					Assert.That(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.Preparing, 5000));
 				}
 
 				// delay to make sure that testing resources has been released
@@ -231,12 +231,12 @@ namespace CarinaStudio.ULogViewer.Logs.DataSources
 				for (var i = 0; i < 10; ++i)
 				{
 					// wait for ready to open reader
-					Assert.IsTrue(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.ReadyToOpenReader, 5000));
+					Assert.That(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.ReadyToOpenReader, 5000));
 
 					// open reader
 					var cancellationTokenSource = new CancellationTokenSource();
 					var openReaderTask = source.OpenReaderAsync(cancellationTokenSource.Token);
-					Assert.AreEqual(LogDataSourceState.OpeningReader, source.State);
+					Assert.That(LogDataSourceState.OpeningReader == source.State);
 
 					// cancel immediately
 					cancellationTokenSource.Cancel();
@@ -252,15 +252,15 @@ namespace CarinaStudio.ULogViewer.Logs.DataSources
 					}
 
 					// wait for ready to open reader
-					Assert.IsTrue(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.ReadyToOpenReader, 5000));
+					Assert.That(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.ReadyToOpenReader, 5000));
 
 					// open reader again
 					cancellationTokenSource = new CancellationTokenSource();
 					openReaderTask = source.OpenReaderAsync(cancellationTokenSource.Token);
-					Assert.AreEqual(LogDataSourceState.OpeningReader, source.State);
+					Assert.That(LogDataSourceState.OpeningReader == source.State);
 
 					// cancel after opening completed
-					Assert.IsTrue(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.ReaderOpened, 5000));
+					Assert.That(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.ReaderOpened, 5000));
 					cancellationTokenSource.Cancel();
 					using var reader = await openReaderTask;
 				}
@@ -292,13 +292,13 @@ namespace CarinaStudio.ULogViewer.Logs.DataSources
 			using var source = provider.CreateSource(options);
 
 			// wait for ready to open reader
-			Assert.IsTrue(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.ReadyToOpenReader, 5000));
+			Assert.That(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.ReadyToOpenReader, 5000));
 
 			// open reader
 			var openReaderTask = source.OpenReaderAsync();
-			Assert.AreEqual(LogDataSourceState.OpeningReader, source.State);
+			Assert.That(LogDataSourceState.OpeningReader == source.State);
 			using var reader = await openReaderTask;
-			Assert.AreEqual(LogDataSourceState.ReaderOpened, source.State);
+			Assert.That(LogDataSourceState.ReaderOpened == source.State);
 
 			// check data
 			var readLines = new List<string>();
@@ -308,23 +308,23 @@ namespace CarinaStudio.ULogViewer.Logs.DataSources
 				readLines.Add(readLine);
 				readLine = reader.ReadLine();
 			}
-			Assert.AreEqual(lines.Length, readLines.Count);
+			Assert.That(lines.Length == readLines.Count);
 			for (var i = lines.Length - 1; i >= 0; --i)
-				Assert.AreEqual(lines[i], readLines[i]);
-			Assert.AreEqual(LogDataSourceState.ReaderOpened, source.State);
+				Assert.That(lines[i] == readLines[i]);
+			Assert.That(LogDataSourceState.ReaderOpened == source.State);
 
 			// close reader
 			reader.Close();
 			if (source.State == LogDataSourceState.ReaderOpened)
-				Assert.IsTrue(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.ClosingReader, 5000));
+				Assert.That(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.ClosingReader, 5000));
 			if (source.State == LogDataSourceState.ClosingReader)
-				Assert.IsTrue(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.Preparing, 5000));
+				Assert.That(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.Preparing, 5000));
 			else
-				Assert.AreEqual(LogDataSourceState.Preparing, source.State);
+				Assert.That(LogDataSourceState.Preparing == source.State);
 
 			// dispose source
 			source.Dispose();
-			Assert.IsTrue(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.Disposed, 5000));
+			Assert.That(await source.WaitForPropertyAsync(nameof(ILogDataSource.State), LogDataSourceState.Disposed, 5000));
 		}
 	}
 }
